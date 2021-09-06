@@ -1,15 +1,17 @@
-import { useMutation } from "@apollo/client";
-import useForm from "../lib/useForm";
-import Form from "./styles/Form";
-import DisplayError from './ErrorMessage';
+import { useMutation } from '@apollo/client';
 import gql from 'graphql-tag';
+import Router from 'next/router';
+import useForm from '../lib/useForm';
+import Form from './styles/Form';
+import DisplayError from './ErrorMessage';
+import { ALL_PRODUCTS_QUERY } from './Products';
 
 const CREATE_PRODUCT_MUTATION = gql`
-  mutation CREATE_PRODUCT_MUTATION (
-  $name: String!
-  $description: String!
-  $price: Int!
-  $image: Upload
+  mutation CREATE_PRODUCT_MUTATION(
+    $name: String!
+    $description: String!
+    $price: Int!
+    $image: Upload
   ) {
     createProduct(
       data: {
@@ -28,30 +30,38 @@ const CREATE_PRODUCT_MUTATION = gql`
   }
 `;
 
-
 export function CreateProduct(props) {
   const { inputs, handleChange, resetForm, clearForm } = useForm({
     image: '',
-    name: "0",
+    name: '0',
     price: 0,
-    description: "",
+    description: '',
   });
 
-  const [createProduct, {loading, error, data}] = useMutation(CREATE_PRODUCT_MUTATION, {
-    variables: inputs
-  })
+  const [createProduct, { loading, error, data }] = useMutation(
+    CREATE_PRODUCT_MUTATION,
+    {
+      variables: inputs,
+      refetchQueries: [{ query: ALL_PRODUCTS_QUERY }], // refetch all products after we send a mutation!
+    }
+  );
 
   return (
-    <Form onSubmit={async (e) => {
-      e.preventDefault();
-      console.log(inputs);
-      await createProduct();
-      clearForm();
-    }}>
+    <Form
+      onSubmit={async (e) => {
+        e.preventDefault();
+        console.log(inputs);
+        await createProduct();
+        clearForm();
+        Router.push({
+          pathname: `/product/${data.createProduct.id}`,
+        });
+      }}
+    >
       <DisplayError error={error} />
       <fieldset disabled={loading} aria-busy={loading}>
-      <label htmlFor="image">
-        Image
+        <label htmlFor="image">
+          Image
           <input
             type="file"
             id="image"
@@ -91,7 +101,7 @@ export function CreateProduct(props) {
             placeholder="Description"
             onChange={handleChange}
             value={inputs.description}
-          ></textarea>
+          />
         </label>
 
         <button type="submit">+ Add Button</button>
