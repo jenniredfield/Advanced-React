@@ -5,5 +5,5 @@
 
 # Question
 
-- In next.js, how do you make a subpath? Like /products/product/:id
+- In next.js, how do you make a subpath? Like /products/product/:id!! Just answered: With folders inside 'pages' folder
 - In next, how you would open a custom endpoint?
